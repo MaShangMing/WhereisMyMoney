@@ -39,7 +39,8 @@ function openDatabase(): Promise<any> {
 function executeSql(sql: string, values: any[] = []): Promise<any> {
   return new Promise((resolve, reject) => {
     // #ifdef APP-PLUS
-    plus.sqlite.executeSql({
+    const sqlite = plus.sqlite as any
+    sqlite.executeSql({
       name: DB_NAME,
       sql,
       success: () => {
@@ -199,8 +200,8 @@ export async function getAllTransactions(): Promise<Transaction[]> {
   // #endif
   
   // #ifdef H5
-  const data = localStorage.getItem('transactions')
-  return data ? JSON.parse(data) : []
+  const data: string = localStorage.getItem('transactions') ?? '[]'
+  return JSON.parse(data)
   // #endif
 }
 
@@ -286,8 +287,8 @@ export async function getAllCategories(): Promise<Category[]> {
   // #endif
   
   // #ifdef H5
-  const data = localStorage.getItem('categories')
-  return data ? JSON.parse(data) : []
+  const data: string = localStorage.getItem('categories') ?? '[]'
+  return JSON.parse(data)
   // #endif
 }
 
@@ -354,8 +355,8 @@ export async function getAllAccounts(): Promise<Account[]> {
   // #endif
   
   // #ifdef H5
-  const data = localStorage.getItem('accounts')
-  return data ? JSON.parse(data) : []
+  const data: string = localStorage.getItem('accounts') ?? '[]'
+  return JSON.parse(data)
   // #endif
 }
 
@@ -448,6 +449,25 @@ function mapRowToAccount(row: any): Account {
   }
 }
 
+function escapeSqlString(value: string): string {
+  return (value || '').replace(/'/g, "''")
+}
+
+// 清空本地数据
+export async function clearLocalData(): Promise<void> {
+  // #ifdef APP-PLUS
+  await executeSql('DELETE FROM transactions')
+  await executeSql('DELETE FROM categories')
+  await executeSql('DELETE FROM accounts')
+  // #endif
+
+  // #ifdef H5
+  localStorage.removeItem('transactions')
+  localStorage.removeItem('categories')
+  localStorage.removeItem('accounts')
+  // #endif
+}
+
 // ==================== 数据导出 ====================
 
 export async function exportToCSV(): Promise<string> {
@@ -492,26 +512,48 @@ export async function backupData(): Promise<string> {
 // 数据恢复
 export async function restoreData(jsonData: string): Promise<void> {
   const data = JSON.parse(jsonData)
-  
-  // 清空现有数据
-  // #ifdef APP-PLUS
-  await executeSql('DELETE FROM transactions')
-  await executeSql('DELETE FROM categories')
-  await executeSql('DELETE FROM accounts')
+
+  const categories = Array.isArray(data?.categories) ? data.categories : []
+  const accounts = Array.isArray(data?.accounts) ? data.accounts : []
+  const transactions = Array.isArray(data?.transactions) ? data.transactions : []
+
+  // #ifdef H5
+  localStorage.setItem('categories', JSON.stringify(categories))
+  localStorage.setItem('accounts', JSON.stringify(accounts))
+  localStorage.setItem('transactions', JSON.stringify(transactions))
+  return
   // #endif
-  
-  // 恢复分类
-  for (const category of data.categories) {
-    await insertCategory(category)
+
+  // #ifdef APP-PLUS
+  await clearLocalData()
+
+  for (const category of categories) {
+    const idValue = Number.isFinite(category.id) ? category.id : null
+    const idSql = idValue === null ? 'NULL' : idValue
+    await executeSql(
+      `INSERT INTO categories (id, name, icon, type, sort_order) VALUES (${idSql}, '${escapeSqlString(category.name)}', '${escapeSqlString(category.icon)}', '${escapeSqlString(category.type)}', ${category.sortOrder ?? 0})`
+    )
   }
-  
-  // 恢复账户
-  for (const account of data.accounts) {
-    await insertAccount(account)
+
+  for (const account of accounts) {
+    const idValue = Number.isFinite(account.id) ? account.id : null
+    const idSql = idValue === null ? 'NULL' : idValue
+    await executeSql(
+      `INSERT INTO accounts (id, name, icon, balance) VALUES (${idSql}, '${escapeSqlString(account.name)}', '${escapeSqlString(account.icon)}', ${account.balance ?? 0})`
+    )
   }
-  
-  // 恢复交易记录
-  for (const transaction of data.transactions) {
-    await insertTransaction(transaction)
+
+  for (const transaction of transactions) {
+    const idValue = Number.isFinite(transaction.id) ? transaction.id : null
+    const idSql = idValue === null ? 'NULL' : idValue
+    await executeSql(`
+      INSERT INTO transactions (id, type, amount, category_id, account_id, merchant, note, source, created_at, confirmed)
+      VALUES (${idSql}, '${escapeSqlString(transaction.type)}', ${transaction.amount},
+              ${transaction.categoryId}, ${transaction.accountId},
+              '${escapeSqlString(transaction.merchant)}', '${escapeSqlString(transaction.note)}',
+              '${escapeSqlString(transaction.source || 'manual')}',
+              '${escapeSqlString(transaction.createdAt)}', ${transaction.confirmed ? 1 : 0})
+    `)
   }
+  // #endif
 }
