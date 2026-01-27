@@ -1,0 +1,35 @@
+{
+  "name": "where-is-my-money",
+  "version": "1.0.0",
+  "description": "智能记账App - 自动监听微信/支付宝收付款通知",
+  "scripts": {
+    "dev:app": "uni -p app",
+    "dev:h5": "uni",
+    "build:app": "uni build -p app",
+    "build:h5": "uni build",
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "3.0.0-4010520250520001",
+    "@dcloudio/uni-components": "3.0.0-4010520250520001",
+    "@dcloudio/uni-h5": "3.0.0-4010520250520001",
+    "@dcloudio/uni-app-plus": "3.0.0-4010520250520001",
+    "vue": "^3.4.21",
+    "pinia": "^2.1.7"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "^3.4.8",
+    "@dcloudio/uni-automator": "3.0.0-4010520250520001",
+    "@dcloudio/uni-cli-shared": "3.0.0-4010520250520001",
+    "@dcloudio/uni-stacktracey": "3.0.0-4010520250520001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-4010520250520001",
+    "@types/node": "^20.11.0",
+    "@vue/tsconfig": "^0.5.1",
+    "sass": "^1.70.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.0",
+    "vue-tsc": "^1.8.27"
+  }
+}

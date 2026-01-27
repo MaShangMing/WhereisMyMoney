@@ -1,0 +1,29 @@
+{
+  "name": "HarmonyNotificationListener",
+  "id": "HarmonyNotificationListener",
+  "version": "1.0.0",
+  "description": "鸿蒙平台支付通知监听插件",
+  "_dp_type": "nativeplugins",
+  "_dp_nativeplugin": {
+    "harmony": {
+      "plugins": [
+        {
+          "type": "module",
+          "name": "HarmonyNotificationListener",
+          "class": "com.whereismymoney.HarmonyNotificationListenerModule"
+        }
+      ],
+      "minAPIVersion": 10,
+      "permissions": [
+        "ohos.permission.NOTIFICATION_CONTROLLER"
+      ],
+      "abilities": [
+        {
+          "name": "NotificationListenerAbility",
+          "type": "service"
+        }
+      ],
+      "parameters": {}
+    }
+  }
+}

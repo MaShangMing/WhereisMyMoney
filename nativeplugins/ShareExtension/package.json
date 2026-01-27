@@ -1,0 +1,28 @@
+{
+  "name": "ShareExtension",
+  "id": "ShareExtension",
+  "version": "1.0.0",
+  "description": "iOS Share Extension - 支持从其他App分享支付信息",
+  "_dp_type": "nativeplugins",
+  "_dp_nativeplugin": {
+    "ios": {
+      "plugins": [],
+      "integrateType": "framework",
+      "deploymentTarget": "12.0",
+      "validArchitectures": ["arm64", "arm64e"],
+      "capabilities": {
+        "entitlements": {
+          "com.apple.security.application-groups": ["group.com.whereismymoney.shared"]
+        }
+      },
+      "extensions": [
+        {
+          "type": "share",
+          "name": "ShareExtension",
+          "bundleId": "$(PRODUCT_BUNDLE_IDENTIFIER).ShareExtension"
+        }
+      ],
+      "parameters": {}
+    }
+  }
+}

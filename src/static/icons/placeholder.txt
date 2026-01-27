@@ -1,0 +1,19 @@
+图标文件占位符
+
+请将以下图标文件放置在此目录：
+- bill.png: 账单图标（未选中）
+- bill-active.png: 账单图标（选中）
+- chart.png: 统计图标（未选中）
+- chart-active.png: 统计图标（选中）
+- settings.png: 设置图标（未选中）
+- settings-active.png: 设置图标（选中）
+
+建议图标尺寸：81x81 像素
+格式：PNG，透明背景
+未选中状态颜色：#999999
+选中状态颜色：#4CAF50
+
+也可以使用在线图标生成工具：
+- https://www.iconfont.cn/
+- https://icons8.com/
+- https://flaticon.com/
