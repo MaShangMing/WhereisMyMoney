@@ -1,51 +1,199 @@
-// 主题色
-$primary-color: #4CAF50;
-$primary-light: #81C784;
-$primary-dark: #388E3C;
+// ===== 主题色系统 =====
+// 主色调 - 优雅的翠绿色
+$primary-color: #10B981;
+$primary-light: #34D399;
+$primary-dark: #059669;
+$primary-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+$primary-soft: rgba(16, 185, 129, 0.1);
 
 // 功能色
-$success-color: #4CAF50;
-$warning-color: #FF9800;
-$danger-color: #F44336;
-$info-color: #2196F3;
+$success-color: #10B981;
+$warning-color: #F59E0B;
+$danger-color: #EF4444;
+$info-color: #3B82F6;
 
 // 收入支出颜色
-$income-color: #4CAF50;
-$expense-color: #F44336;
+$income-color: #10B981;
+$income-light: rgba(16, 185, 129, 0.15);
+$expense-color: #EF4444;
+$expense-light: rgba(239, 68, 68, 0.15);
 
-// 文字颜色
-$text-primary: #333333;
-$text-secondary: #666666;
-$text-placeholder: #999999;
-$text-disabled: #cccccc;
+// ===== 文字颜色 =====
+$text-primary: #1F2937;
+$text-secondary: #6B7280;
+$text-placeholder: #9CA3AF;
+$text-disabled: #D1D5DB;
+$text-inverse: #FFFFFF;
 
-// 背景色
-$bg-color: #F5F5F5;
+// ===== 背景色 =====
+$bg-color: #F3F4F6;
 $bg-white: #FFFFFF;
-$bg-grey: #FAFAFA;
+$bg-grey: #F9FAFB;
+$bg-card: rgba(255, 255, 255, 0.95);
+$bg-overlay: rgba(0, 0, 0, 0.5);
 
-// 边框颜色
-$border-color: #EEEEEE;
-$border-light: #F5F5F5;
+// 毛玻璃效果
+$glass-bg: rgba(255, 255, 255, 0.72);
+$glass-blur: blur(20px);
 
-// 间距
+// ===== 边框颜色 =====
+$border-color: #E5E7EB;
+$border-light: #F3F4F6;
+$border-focus: $primary-color;
+
+// ===== 阴影系统 =====
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+$shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+$shadow-float: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+// 彩色阴影
+$shadow-primary: 0 8px 20px rgba(16, 185, 129, 0.35);
+$shadow-danger: 0 4px 12px rgba(239, 68, 68, 0.25);
+
+// ===== 间距系统 =====
 $spacing-xs: 8rpx;
 $spacing-sm: 16rpx;
 $spacing-md: 24rpx;
 $spacing-lg: 32rpx;
 $spacing-xl: 48rpx;
+$spacing-2xl: 64rpx;
 
-// 字体大小
-$font-xs: 24rpx;
-$font-sm: 28rpx;
-$font-md: 32rpx;
-$font-lg: 36rpx;
+// 页面内边距
+$page-padding: 32rpx;
+
+// ===== 字体系统 =====
+$font-xs: 22rpx;
+$font-sm: 26rpx;
+$font-md: 30rpx;
+$font-lg: 34rpx;
 $font-xl: 40rpx;
 $font-xxl: 48rpx;
+$font-3xl: 60rpx;
 
-// 圆角
-$radius-sm: 8rpx;
-$radius-md: 12rpx;
-$radius-lg: 16rpx;
-$radius-xl: 24rpx;
+// 字重
+$font-normal: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+
+// 行高
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ===== 圆角系统 =====
+$radius-xs: 6rpx;
+$radius-sm: 10rpx;
+$radius-md: 14rpx;
+$radius-lg: 20rpx;
+$radius-xl: 28rpx;
+$radius-2xl: 36rpx;
 $radius-round: 50%;
+$radius-full: 9999rpx;
+
+// ===== 动画系统 =====
+$transition-fast: 0.15s ease;
+$transition-normal: 0.25s ease;
+$transition-slow: 0.35s ease;
+$transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// ===== 层级系统 =====
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-fixed: 300;
+$z-modal-backdrop: 400;
+$z-modal: 500;
+$z-popover: 600;
+$z-tooltip: 700;
+$z-toast: 800;
+
+// ===== 安全区域 =====
+$safe-area-top: env(safe-area-inset-top);
+$safe-area-bottom: env(safe-area-inset-bottom);
+
+// ===== 常用 Mixins =====
+// 毛玻璃效果
+@mixin glass-effect {
+  background: $glass-bg;
+  backdrop-filter: $glass-blur;
+  -webkit-backdrop-filter: $glass-blur;
+}
+
+// 卡片样式
+@mixin card-style {
+  background: $bg-white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-card;
+}
+
+// 按钮按压效果
+@mixin press-effect {
+  transition: transform $transition-fast, box-shadow $transition-fast;
+  
+  &:active {
+    transform: scale(0.97);
+    box-shadow: $shadow-xs;
+  }
+}
+
+// 悬浮效果
+@mixin hover-lift {
+  transition: transform $transition-normal, box-shadow $transition-normal;
+  
+  &:active {
+    transform: translateY(-4rpx);
+    box-shadow: $shadow-lg;
+  }
+}
+
+// 文字省略
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $lines;
+    overflow: hidden;
+  }
+}
+
+// Flex 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flex 两端对齐
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 禁用选中
+@mixin no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+// 点击区域扩展
+@mixin tap-extend($size: 20rpx) {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -$size;
+    left: -$size;
+    right: -$size;
+    bottom: -$size;
+  }
+}
