@@ -1,54 +1,87 @@
 <template>
   <view class="page">
-    <!-- 账户总览 -->
+    <!-- 总资产卡片 -->
     <view class="total-card">
-      <text class="total-label">总资产</text>
-      <text class="total-value">¥{{ formatMoney(totalBalance) }}</text>
+      <view class="total-bg"></view>
+      <view class="total-content">
+        <text class="total-label">总资产</text>
+        <view class="total-value">
+          <text class="currency">¥</text>
+          <text class="amount" :class="totalBalance >= 0 ? 'positive' : 'negative'">
+            {{ formatMoney(Math.abs(totalBalance)) }}
+          </text>
+        </view>
+        <view class="total-hint">
+          <text>共 {{ accounts.length }} 个账户</text>
+        </view>
+      </view>
     </view>
-    
+
     <!-- 账户列表 -->
     <view class="account-list">
-      <view 
-        v-for="account in accounts" 
+      <view class="list-header">
+        <text class="list-title">我的账户</text>
+      </view>
+
+      <view
+        v-for="account in accounts"
         :key="account.id"
-        class="account-item"
+        class="account-card"
         @click="editAccount(account)"
         @longpress="showAccountActions(account)"
       >
-        <view class="account-icon">
-          <text>{{ account.icon }}</text>
+        <view class="card-left">
+          <view class="account-icon">
+            <text>{{ account.icon }}</text>
+          </view>
+          <view class="account-info">
+            <text class="account-name">{{ account.name }}</text>
+            <text class="account-type">支付账户</text>
+          </view>
         </view>
-        <view class="account-info">
-          <text class="account-name">{{ account.name }}</text>
+        <view class="card-right">
           <text class="account-balance" :class="account.balance >= 0 ? 'positive' : 'negative'">
             ¥{{ formatMoney(account.balance) }}
           </text>
+          <text class="account-arrow">›</text>
         </view>
-        <text class="arrow">›</text>
       </view>
-      
+
       <!-- 添加账户按钮 -->
-      <view class="add-account" @click="showAddDialog">
-        <text class="add-icon">+</text>
-        <text class="add-text">添加账户</text>
+      <view class="add-card" @click="showAddDialog">
+        <view class="add-icon">
+          <text>+</text>
+        </view>
+        <text class="add-text">添加新账户</text>
       </view>
     </view>
-    
+
     <!-- 编辑弹窗 -->
-    <view class="edit-popup" v-if="showEdit" @click="closeEdit">
-      <view class="popup-content" @click.stop>
+    <view class="popup-overlay" v-if="showEdit" @click="closeEdit">
+      <view class="popup-container" @click.stop>
         <view class="popup-header">
           <text class="popup-title">{{ isEditing ? '编辑账户' : '添加账户' }}</text>
-          <text class="popup-close" @click="closeEdit">×</text>
+          <view class="popup-close" @click="closeEdit">
+            <text>×</text>
+          </view>
         </view>
-        
+
         <view class="popup-body">
+          <!-- 预览 -->
+          <view class="preview-section">
+            <view class="preview-icon">
+              <text>{{ editForm.icon }}</text>
+            </view>
+            <text class="preview-name">{{ editForm.name || '账户名称' }}</text>
+            <text class="preview-balance">¥{{ formatMoney(parseFloat(balanceInput) || 0) }}</text>
+          </view>
+
           <!-- 图标选择 -->
           <view class="form-section">
             <text class="form-label">选择图标</text>
             <view class="icon-grid">
-              <view 
-                v-for="icon in iconOptions" 
+              <view
+                v-for="icon in iconOptions"
                 :key="icon"
                 class="icon-option"
                 :class="{ active: editForm.icon === icon }"
@@ -58,33 +91,35 @@
               </view>
             </view>
           </view>
-          
+
           <!-- 名称输入 -->
           <view class="form-section">
             <text class="form-label">账户名称</text>
-            <input 
-              class="form-input" 
-              v-model="editForm.name" 
+            <input
+              class="form-input"
+              v-model="editForm.name"
               placeholder="请输入账户名称"
+              :placeholder-style="'color: #9CA3AF'"
               maxlength="10"
             />
           </view>
-          
+
           <!-- 余额输入 -->
           <view class="form-section">
             <text class="form-label">账户余额</text>
-            <view class="balance-input">
-              <text class="currency">¥</text>
-              <input 
-                class="form-input balance" 
+            <view class="balance-input-wrapper">
+              <text class="balance-currency">¥</text>
+              <input
+                class="balance-input"
                 type="digit"
-                v-model="balanceInput" 
+                v-model="balanceInput"
                 placeholder="0.00"
+                :placeholder-style="'color: #9CA3AF'"
               />
             </view>
           </view>
         </view>
-        
+
         <view class="popup-footer">
           <button class="btn cancel" @click="closeEdit">取消</button>
           <button class="btn confirm" @click="saveAccount">保存</button>
@@ -128,6 +163,9 @@ const totalBalance = computed(() => {
 
 // 方法
 function formatMoney(amount: number): string {
+  if (Math.abs(amount) >= 10000) {
+    return (amount / 10000).toFixed(2) + '万'
+  }
   return amount.toFixed(2)
 }
 
@@ -160,9 +198,9 @@ async function saveAccount() {
     uni.showToast({ title: '请输入账户名称', icon: 'none' })
     return
   }
-  
+
   editForm.value.balance = parseFloat(balanceInput.value) || 0
-  
+
   try {
     if (isEditing.value && editForm.value.id) {
       await store.updateAccount(editForm.value as Account)
@@ -196,9 +234,8 @@ function showAccountActions(account: Account) {
 }
 
 async function deleteAccount(account: Account) {
-  // 检查是否有交易使用此账户
   const hasTransactions = store.transactions.some(t => t.accountId === account.id)
-  
+
   if (hasTransactions) {
     uni.showModal({
       title: '无法删除',
@@ -207,10 +244,11 @@ async function deleteAccount(account: Account) {
     })
     return
   }
-  
+
   uni.showModal({
     title: '确认删除',
     content: `确定要删除账户"${account.name}"吗？`,
+    confirmColor: '#EF4444',
     success: async (res) => {
       if (res.confirm && account.id) {
         await store.deleteAccount(account.id)
@@ -227,13 +265,30 @@ async function deleteAccount(account: Account) {
 .page {
   min-height: 100vh;
   background-color: $bg-color;
+  padding-bottom: calc(100rpx + $safe-area-bottom);
 }
 
+// 总资产卡片
 .total-card {
-  background: linear-gradient(135deg, $primary-color, $primary-dark);
-  margin: 20rpx;
-  padding: 40rpx;
-  border-radius: $radius-lg;
+  position: relative;
+  margin: $spacing-lg $page-padding;
+  padding: $spacing-2xl;
+  border-radius: $radius-2xl;
+  overflow: hidden;
+}
+
+.total-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $primary-gradient;
+}
+
+.total-content {
+  position: relative;
+  z-index: 1;
   text-align: center;
 }
 
@@ -241,83 +296,151 @@ async function deleteAccount(account: Account) {
   font-size: $font-sm;
   color: rgba(255, 255, 255, 0.8);
   display: block;
-  margin-bottom: 16rpx;
+  margin-bottom: $spacing-sm;
 }
 
 .total-value {
-  font-size: 64rpx;
-  font-weight: 600;
-  color: #ffffff;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: $spacing-md;
 }
 
+.currency {
+  font-size: $font-xl;
+  color: $text-inverse;
+  margin-right: 8rpx;
+}
+
+.amount {
+  font-size: $font-3xl;
+  font-weight: $font-bold;
+  color: $text-inverse;
+
+  &.positive {
+    color: $text-inverse;
+  }
+
+  &.negative {
+    color: #FCA5A5;
+  }
+}
+
+.total-hint {
+  text {
+    font-size: $font-xs;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+// 账户列表
 .account-list {
-  padding: 0 20rpx 20rpx;
+  padding: 0 $page-padding;
 }
 
-.account-item {
+.list-header {
+  margin-bottom: $spacing-md;
+}
+
+.list-title {
+  font-size: $font-lg;
+  color: $text-primary;
+  font-weight: $font-semibold;
+}
+
+.account-card {
   display: flex;
   align-items: center;
-  background-color: $bg-white;
-  padding: 24rpx;
-  border-radius: $radius-md;
-  margin-bottom: 16rpx;
+  justify-content: space-between;
+  background: $bg-white;
+  padding: $spacing-lg;
+  border-radius: $radius-xl;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-sm;
+  @include press-effect;
+}
+
+.card-left {
+  display: flex;
+  align-items: center;
 }
 
 .account-icon {
-  width: 80rpx;
-  height: 80rpx;
-  background-color: $bg-grey;
-  border-radius: $radius-round;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40rpx;
-  margin-right: 20rpx;
+  width: 88rpx;
+  height: 88rpx;
+  @include flex-center;
+  background: $bg-grey;
+  border-radius: $radius-xl;
+  margin-right: $spacing-md;
+  font-size: 44rpx;
 }
 
 .account-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .account-name {
-  font-size: $font-md;
+  font-size: $font-lg;
   color: $text-primary;
-  display: block;
-  margin-bottom: 8rpx;
+  font-weight: $font-medium;
+  margin-bottom: 4rpx;
+}
+
+.account-type {
+  font-size: $font-xs;
+  color: $text-placeholder;
+}
+
+.card-right {
+  display: flex;
+  align-items: center;
 }
 
 .account-balance {
-  font-size: $font-lg;
-  font-weight: 600;
-  
+  font-size: $font-xl;
+  font-weight: $font-semibold;
+  margin-right: $spacing-sm;
+
   &.positive {
     color: $income-color;
   }
-  
+
   &.negative {
     color: $expense-color;
   }
 }
 
-.arrow {
+.account-arrow {
   font-size: 32rpx;
   color: $text-placeholder;
 }
 
-.add-account {
+// 添加卡片
+.add-card {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: $bg-white;
-  padding: 32rpx;
-  border-radius: $radius-md;
+  background: $bg-white;
+  padding: $spacing-xl;
+  border-radius: $radius-xl;
   border: 2rpx dashed $border-color;
+  @include press-effect;
 }
 
 .add-icon {
-  font-size: 40rpx;
-  color: $primary-color;
-  margin-right: 10rpx;
+  width: 64rpx;
+  height: 64rpx;
+  @include flex-center;
+  background: $primary-soft;
+  border-radius: $radius-lg;
+  margin-right: $spacing-md;
+
+  text {
+    font-size: $font-xl;
+    color: $primary-color;
+    font-weight: 300;
+  }
 }
 
 .add-text {
@@ -325,135 +448,189 @@ async function deleteAccount(account: Account) {
   color: $primary-color;
 }
 
-// 编辑弹窗
-.edit-popup {
+// 弹窗
+.popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+  @include flex-center;
+  z-index: $z-modal;
 }
 
-.popup-content {
+.popup-container {
   width: 90%;
-  max-width: 600rpx;
-  background-color: $bg-white;
-  border-radius: $radius-lg;
+  max-width: 640rpx;
+  background: $bg-white;
+  border-radius: $radius-2xl;
   overflow: hidden;
+  animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 30rpx;
+  @include flex-between;
+  padding: $spacing-lg;
   border-bottom: 1rpx solid $border-light;
 }
 
 .popup-title {
   font-size: $font-lg;
-  font-weight: 600;
   color: $text-primary;
+  font-weight: $font-semibold;
 }
 
 .popup-close {
-  font-size: 48rpx;
-  color: $text-secondary;
-  padding: 0 10rpx;
+  width: 60rpx;
+  height: 60rpx;
+  @include flex-center;
+
+  text {
+    font-size: 48rpx;
+    color: $text-secondary;
+  }
 }
 
 .popup-body {
-  padding: 30rpx;
+  padding: $spacing-lg;
   max-height: 60vh;
   overflow-y: auto;
 }
 
+// 预览
+.preview-section {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-xl;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  border-radius: $radius-xl;
+  margin-bottom: $spacing-lg;
+}
+
+.preview-icon {
+  width: 100rpx;
+  height: 100rpx;
+  @include flex-center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-xl;
+  margin-bottom: $spacing-md;
+  font-size: 56rpx;
+}
+
+.preview-name {
+  font-size: $font-lg;
+  color: $text-inverse;
+  font-weight: $font-medium;
+  margin-bottom: 8rpx;
+}
+
+.preview-balance {
+  font-size: $font-xl;
+  color: $text-inverse;
+  font-weight: $font-bold;
+}
+
+// 表单
 .form-section {
-  margin-bottom: 30rpx;
+  margin-bottom: $spacing-lg;
 }
 
 .form-label {
   font-size: $font-sm;
   color: $text-secondary;
-  margin-bottom: 16rpx;
+  margin-bottom: $spacing-sm;
   display: block;
 }
 
 .icon-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
+  gap: $spacing-sm;
 }
 
 .icon-option {
-  width: calc(16.66% - 14rpx);
+  width: calc(16.66% - #{$spacing-sm * 0.833});
   aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: $bg-grey;
-  border-radius: $radius-md;
+  @include flex-center;
+  background: $bg-grey;
+  border-radius: $radius-lg;
   font-size: 40rpx;
-  transition: all 0.3s;
-  
+  transition: all $transition-fast;
+  border: 2rpx solid transparent;
+
   &.active {
-    background-color: rgba(76, 175, 80, 0.2);
-    border: 2rpx solid $primary-color;
+    background: $primary-soft;
+    border-color: $primary-color;
   }
 }
 
 .form-input {
   width: 100%;
-  padding: 24rpx;
-  background-color: $bg-grey;
-  border-radius: $radius-md;
+  padding: $spacing-md;
+  background: $bg-grey;
+  border-radius: $radius-lg;
   font-size: $font-md;
-}
-
-.balance-input {
-  display: flex;
-  align-items: center;
-  background-color: $bg-grey;
-  border-radius: $radius-md;
-  padding-left: 24rpx;
-}
-
-.currency {
-  font-size: $font-lg;
   color: $text-primary;
 }
 
-.balance {
+.balance-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: $bg-grey;
+  border-radius: $radius-lg;
+  padding-left: $spacing-md;
+}
+
+.balance-currency {
+  font-size: $font-lg;
+  color: $text-primary;
+  font-weight: $font-medium;
+}
+
+.balance-input {
   flex: 1;
-  padding-left: 10rpx;
-  background-color: transparent;
+  padding: $spacing-md;
+  padding-left: $spacing-sm;
+  background: transparent;
+  font-size: $font-md;
+  color: $text-primary;
 }
 
 .popup-footer {
   display: flex;
-  gap: 20rpx;
-  padding: 20rpx 30rpx 30rpx;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  border-top: 1rpx solid $border-light;
 }
 
 .btn {
   flex: 1;
-  padding: 24rpx 0;
-  border-radius: $radius-md;
+  padding: $spacing-md 0;
+  border-radius: $radius-lg;
   font-size: $font-md;
-  
+  border: none;
+  @include press-effect;
+
   &.cancel {
-    background-color: $bg-grey;
+    background: $bg-grey;
     color: $text-primary;
   }
-  
+
   &.confirm {
-    background-color: $primary-color;
-    color: #ffffff;
+    background: $primary-color;
+    color: $text-inverse;
   }
 }
 </style>
