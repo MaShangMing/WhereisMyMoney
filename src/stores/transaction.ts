@@ -9,7 +9,7 @@ import type {
   CategoryStat,
   DailyStat
 } from '@/types'
-import * as db from '@/utils/db'
+import * as db from '@/utils/data-service'
 
 export const useTransactionStore = defineStore('transaction', () => {
   // 状态

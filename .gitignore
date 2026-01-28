@@ -44,3 +44,5 @@ nativeplugins/*/ios/build/
 
 # 锁定依赖版本
 package-lock.json
+# Cloud storage data
+server/data/

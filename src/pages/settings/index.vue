@@ -88,7 +88,20 @@
       <view class="section-header">
         <text class="section-title">数据管理</text>
       </view>
-
+      <view class="setting-item">
+        <view class="setting-icon">
+          <text>☁️</text>
+        </view>
+        <view class="setting-content">
+          <text class="setting-label">云端存储</text>
+          <text class="setting-desc">开启后仅保存到云端，本地不再存储</text>
+        </view>
+        <switch
+          :checked="cloudEnabled"
+          color="#10B981"
+          @change="onCloudSwitchChange"
+        />
+      </view>
       <view class="setting-item" @click="goToCategories">
         <view class="setting-icon">
           <text>📑</text>
@@ -221,7 +234,7 @@
 
     <!-- 底部信息 -->
     <view class="footer">
-      <text class="footer-text">所有数据仅存储在您的设备本地</text>
+      <text class="footer-text">数据可选择本地或云端存储</text>
       <text class="footer-text">Made with ❤️</text>
     </view>
   </view>
@@ -230,7 +243,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useTransactionStore } from '@/stores/transaction'
-import { exportToCSV, backupData as dbBackup, restoreData as dbRestore } from '@/utils/db'
+import { exportToCSV, backupData as dbBackup, restoreData as dbRestore, switchStorageMode } from '@/utils/data-service'
+import { getStorageMode } from '@/utils/storage-mode'
 import { parsePaymentText } from '@/utils/parser'
 
 const store = useTransactionStore()
@@ -240,6 +254,8 @@ const notificationEnabled = ref(false)
 const accessibilityEnabled = ref(false)
 const hapticsEnabled = ref(true)
 const isIOS = ref(false)
+const cloudEnabled = ref(false)
+const switchingCloud = ref(false)
 
 // 计算属性
 const totalTransactions = computed(() => store.transactions.length)
@@ -474,6 +490,85 @@ async function restoreData() {
   })
 }
 
+function confirmEnableCloud(): Promise<boolean> {
+  return new Promise(resolve => {
+    uni.showModal({
+      title: '启用云端存储',
+      content: '将上传现有本地数据到云端，之后本地不再保存。请确保云端服务可用。',
+      confirmText: '开启',
+      cancelText: '取消',
+      success: (res) => resolve(res.confirm)
+    })
+  })
+}
+
+function chooseDisableCloudAction(): Promise<'download' | 'switch' | 'cancel'> {
+  return new Promise(resolve => {
+    uni.showActionSheet({
+      itemList: ['下载云端数据并切换', '仅切换(不下载)'],
+      success: (res) => {
+        resolve(res.tapIndex === 0 ? 'download' : 'switch')
+      },
+      fail: () => resolve('cancel')
+    })
+  })
+}
+
+async function reloadStoreData() {
+  await store.loadTransactions()
+  await store.loadCategories()
+  await store.loadAccounts()
+}
+
+async function onCloudSwitchChange(event: any) {
+  if (switchingCloud.value) return
+  const nextEnabled = !!event?.detail?.value
+
+  if (nextEnabled) {
+    cloudEnabled.value = false
+    const confirmed = await confirmEnableCloud()
+    if (!confirmed) {
+      cloudEnabled.value = false
+      return
+    }
+    switchingCloud.value = true
+    try {
+      await switchStorageMode('cloud', { migrate: true })
+      cloudEnabled.value = true
+      await reloadStoreData()
+      uni.showToast({ title: '已启用云端存储', icon: 'success' })
+    } catch (e) {
+      console.error('启用云端存储失败', e)
+      cloudEnabled.value = false
+      uni.showToast({ title: '启用失败', icon: 'none' })
+    } finally {
+      switchingCloud.value = false
+    }
+    return
+  }
+
+  cloudEnabled.value = true
+  const action = await chooseDisableCloudAction()
+  if (action === 'cancel') {
+    cloudEnabled.value = true
+    return
+  }
+
+  switchingCloud.value = true
+  try {
+    await switchStorageMode('local', { migrate: action === 'download' })
+    cloudEnabled.value = false
+    await reloadStoreData()
+    uni.showToast({ title: '已切换为本地存储', icon: 'success' })
+  } catch (e) {
+    console.error('切换本地存储失败', e)
+    cloudEnabled.value = true
+    uni.showToast({ title: '切换失败', icon: 'none' })
+  } finally {
+    switchingCloud.value = false
+  }
+}
+
 function toggleAccessibility() {
   accessibilityEnabled.value = !accessibilityEnabled.value
   uni.setStorageSync('accessibilityEnabled', accessibilityEnabled.value)
@@ -491,7 +586,7 @@ function toggleHaptics() {
 function showPrivacyPolicy() {
   uni.showModal({
     title: '隐私政策',
-    content: '我的账本尊重并保护用户隐私。\n\n1. 所有数据仅存储在本地设备\n2. 通知监听仅用于识别支付信息\n3. 不会上传任何个人数据\n4. 您可以随时导出或删除数据\n\n如有疑问，请联系我们。',
+    content: '我的账本尊重并保护用户隐私。\n\n1. 可选择仅本地存储或上传云端\n2. 开启云端存储后，数据将上传至你的云端服务，本地不再保存交易数据\n3. 通知监听仅用于识别支付信息\n4. 您可以随时导出或删除数据\n\n如有疑问，请联系我们。',
     showCancel: false
   })
 }
@@ -511,6 +606,7 @@ onMounted(() => {
 
   // 读取设置
   notificationEnabled.value = uni.getStorageSync('notificationEnabled') || false
+  cloudEnabled.value = getStorageMode() === 'cloud'
   accessibilityEnabled.value = uni.getStorageSync('accessibilityEnabled') || false
   hapticsEnabled.value = uni.getStorageSync('hapticsEnabled') !== false
 })
