@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
 import { useTransactionStore } from '@/stores/transaction'
-import { initDatabase } from '@/utils/db'
+import { initData } from '@/utils/data-service'
 
 onLaunch(async () => {
   console.log('App Launch')
-  // 初始化数据库
-  await initDatabase()
-  
-  // 初始化 store
-  const transactionStore = useTransactionStore()
-  await transactionStore.loadTransactions()
-  await transactionStore.loadCategories()
-  await transactionStore.loadAccounts()
+  try {
+    // 初始化数据源
+    await initData()
+
+    // 初始化 store
+    const transactionStore = useTransactionStore()
+    await transactionStore.loadTransactions()
+    await transactionStore.loadCategories()
+    await transactionStore.loadAccounts()
+  } catch (e) {
+    console.error('初始化数据失败', e)
+    uni.showToast({ title: '初始化失败，请检查云端服务', icon: 'none' })
+  }
 })
 
 onShow(() => {
