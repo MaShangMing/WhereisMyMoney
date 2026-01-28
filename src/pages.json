@@ -4,15 +4,17 @@
       "path": "pages/index/index",
       "style": {
         "navigationBarTitleText": "我的账本",
-        "navigationBarBackgroundColor": "#4CAF50",
-        "navigationBarTextStyle": "white"
+        "navigationBarBackgroundColor": "#10B981",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/add/index",
       "style": {
         "navigationBarTitleText": "记一笔",
-        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarBackgroundColor": "#10B981",
         "navigationBarTextStyle": "white"
       }
     },
@@ -20,7 +22,7 @@
       "path": "pages/statistics/index",
       "style": {
         "navigationBarTitleText": "统计",
-        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarBackgroundColor": "#10B981",
         "navigationBarTextStyle": "white"
       }
     },
@@ -28,7 +30,7 @@
       "path": "pages/pending/index",
       "style": {
         "navigationBarTitleText": "待确认",
-        "navigationBarBackgroundColor": "#FF9800",
+        "navigationBarBackgroundColor": "#F59E0B",
         "navigationBarTextStyle": "white"
       }
     },
@@ -36,7 +38,7 @@
       "path": "pages/settings/index",
       "style": {
         "navigationBarTitleText": "设置",
-        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarBackgroundColor": "#10B981",
         "navigationBarTextStyle": "white"
       }
     },
@@ -44,7 +46,7 @@
       "path": "pages/categories/index",
       "style": {
         "navigationBarTitleText": "分类管理",
-        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarBackgroundColor": "#10B981",
         "navigationBarTextStyle": "white"
       }
     },
@@ -52,7 +54,23 @@
       "path": "pages/accounts/index",
       "style": {
         "navigationBarTitleText": "账户管理",
-        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarBackgroundColor": "#10B981",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/scan/index",
+      "style": {
+        "navigationBarTitleText": "扫描识别",
+        "navigationBarBackgroundColor": "#10B981",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/ios-guide/index",
+      "style": {
+        "navigationBarTitleText": "iOS自动记账",
+        "navigationBarBackgroundColor": "#10B981",
         "navigationBarTextStyle": "white"
       }
     }
@@ -60,14 +78,17 @@
   "globalStyle": {
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "我的账本",
-    "navigationBarBackgroundColor": "#4CAF50",
-    "backgroundColor": "#F5F5F5"
+    "navigationBarBackgroundColor": "#10B981",
+    "backgroundColor": "#F3F4F6",
+    "backgroundColorTop": "#10B981",
+    "backgroundColorBottom": "#F3F4F6"
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#4CAF50",
-    "borderStyle": "black",
+    "color": "#9CA3AF",
+    "selectedColor": "#10B981",
+    "borderStyle": "white",
     "backgroundColor": "#ffffff",
+    "height": "110rpx",
     "list": [
       {
         "pagePath": "pages/index/index",
